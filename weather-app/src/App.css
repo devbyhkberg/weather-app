@@ -1,0 +1,46 @@
+#root {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.weather-app {
+  --bs-primary: var(--blue-500);
+  --bs-secondary: var(--orange-500);
+  --bs-border-color: var(--neutral-700);
+  --bs-body-color: var(--neutral-0);
+  --bs-body-bg: var(--neutral-900);
+  --bs-secondary-bg: var(--neutral-700);
+  --bs-tertiary-bg: var(--neutral-800);
+}
+
+.weather-app .btn-primary {
+  --bs-btn-bg: var(--blue-500);
+  --bs-btn-border-color: var(--blue-500);
+  --bs-btn-hover-bg: var(--blue-700);
+  --bs-btn-hover-border-color: var(--blue-700);
+  --bs-btn-active-bg: var(--blue-700);
+  --bs-btn-active-border-color: var(--blue-700);
+  --bs-btn-disabled-bg: var(--neutral-600);
+  --bs-btn-disabled-border-color: var(--neutral-600);
+}
+
+.weather-app .form-control,
+.weather-app .form-select,
+.weather-app .input-group-text {
+  background-color: var(--neutral-700);
+  color: var(--neutral-0);
+  border-color: var(--neutral-600);
+}
+
+.weather-app .form-control::placeholder {
+  color: var(--neutral-300);
+}
+
+.weather-app .form-control:focus,
+.weather-app .form-select:focus {
+  background-color: var(--neutral-700);
+  color: var(--neutral-0);
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 0.25rem hsl(233 67% 56% / 0.25);
+}
