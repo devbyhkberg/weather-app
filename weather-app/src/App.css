@@ -1,7 +1,7 @@
 #root {
   width: 100vw;
   min-height: 100vh;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .weather-app {
@@ -29,6 +29,17 @@
   background-color: var(--neutral-800);
   border-color: var(--neutral-700);
 }
+
+.card-rounded-md {
+    --bs-card-border-radius: 20px;
+  }
+@media (min-width: 768px) {
+  .card-rounded-md {
+    --bs-card-border-radius: 25px;
+  }
+}
+
+
 
 .weather-app .form-control,
 .weather-app .form-select,

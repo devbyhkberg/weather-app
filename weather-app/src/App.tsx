@@ -7,7 +7,7 @@ function App() {
 
   return (
     <>
-      <div className='weather-app container-fluid w-100 h-100'>
+      <div className='weather-app w-100 h-100'>
         <div className='d-flex w-100 sticky-top justify-content-between align-items-center p-3'>
           <img src={logo} alt='logo' className='logo' />
           <select className='form-select w-auto'>
