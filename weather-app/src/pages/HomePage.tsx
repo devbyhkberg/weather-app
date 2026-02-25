@@ -2,21 +2,72 @@ import searchIcon from '../assets/images/icon-search.svg'
 import bgTodayBig from '../assets/images/bg-today-large.svg'
 import bgTodaySmall from '../assets/images/bg-today-small.svg'
 import iconSunny from '../assets/images/icon-sunny.webp'
-
+import { useState, useEffect, use } from 'react'
+import { useDebounce } from '../hooks/useDebounce'
+import { searchLocations, type GeocodingResult } from '../api/geocoding'
+import { getForecast, type ForecastResponse } from '../api/forecast'
 
 function HomePage() {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
+    const [selectedLocation, setSelectedLocation] = useState<GeocodingResult | null>(null);
+    const [forecast, setForecast] = useState<ForecastResponse | null>(null);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    function selectLocation(location: GeocodingResult) {
+        setSelectedLocation(location);
+        setSearchTerm('');
+
+    }
+
+    useEffect(() => {
+        if (debouncedSearchTerm) {
+            searchLocations(debouncedSearchTerm).then((response) => {
+                setSearchResults(response.results ?? []);
+            });
+        } else {
+            setSearchResults([]);
+        }
+    }, [debouncedSearchTerm])
+
+    useEffect(() => {
+        if (selectedLocation) {
+            getForecast(selectedLocation.latitude, selectedLocation.longitude).then((response) => {
+                setForecast(response);
+            });
+        }
+    }, [selectedLocation])
     return (
         <div className='container'>
             <div className="d-flex flex-column justify-content-start align-items-center">
                 <h1 className="pt-5">How's the sky looking today?</h1>
                 {/* SEARCH BAR */}
                 <div className="d-flex flex-md-row flex-column gap-3 justify-content-start align-items-stretch align-items-md-center mt-5">
-                    <div className='input-group w-auto'>
-                        <span className='input-group-text'>
-                            <img src={searchIcon} alt='search icon' />
-                        </span>
-                        <input type="text" className="form-control w-auto" placeholder="Search for location" />
-
+                    <div className='drowpdown'>
+                        <div className='input-group w-auto'>
+                            <span className='input-group-text'>
+                                <img src={searchIcon} alt='search icon' />
+                            </span>
+                            <input
+                                type="text"
+                                className="form-control w-auto"
+                                placeholder="Search for a place..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <ul className='dropdown-menu show'>
+                            {searchResults.map((result) => (
+                                <li key={result.id}>
+                                    <button
+                                        className='dropdown-item'
+                                        onClick={() => selectLocation(result)}
+                                    >
+                                        {result.name}, {result.country}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                     <button className="btn btn-primary">Search</button>
                 </div>
@@ -28,13 +79,21 @@ function HomePage() {
                                 <source srcSet={bgTodayBig} media="(min-width: 768px)" />
                                 <img src={bgTodaySmall} className="card-img" alt="" />
                             </picture>
-                            <div className='card-img-overlay d-flex justify-content-start align-items-center gap-4'>
-                                <div className=' d-flex flex-column justify-content-center align-items-start p-5 gap-2'>
-                                    <h5 className='card-title'>Berlin, Germany</h5>
-                                    <p className='card-text'>Tuesday, Aug 5, 2025</p>
+                            <div className='card-img-overlay flex-column flex-md-row d-flex justify-content-start align-items-center gap-4'>
+                                <div className=' d-flex flex-column justify-content-center align-items-center align-items-md-start p-md-5 p-3 gap-2'>
+                                    <h5 className='card-title'>{selectedLocation?.name}, {selectedLocation?.country}</h5>
+                                    <p className='card-text'>{new Date().toLocaleDateString("en-US", {
+                                        weekday: "long",
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                    })}</p>
                                 </div>
-                                <img src={iconSunny} alt='sunny icon' className='ms-auto' style={{ height: "8em" }} />
-                                <h1 className='display-1'>64°</h1>
+                                <div className='d-flex justify-content-center align-items-center gap-4'>
+                                    <img src={iconSunny} alt='sunny icon' className='ms-auto' style={{ height: "8em" }} />
+                                    <h1 className='display-1'>{forecast?.current?.temperature_2m ?? '--'}°</h1>
+                                </div>
+                                
                             </div>
                         </div>
                         {/* WEATHER DESCRIPTION*/}
@@ -43,7 +102,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Feels like</h6>
-                                        <p className='card-text'>64°</p>
+                                        <p className='card-text'>{forecast?.current?.apparent_temperature ?? '--'} {forecast?.current_units?.apparent_temperature}</p>
                                     </div>
                                 </div>
                             </div>
@@ -51,7 +110,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Humidity</h6>
-                                        <p className='card-text'>46%</p>
+                                        <p className='card-text'>{forecast?.current?.relative_humidity_2m ?? '--'} {forecast?.current_units?.relative_humidity_2m}</p>
                                     </div>
                                 </div>
                             </div>
@@ -59,7 +118,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Wind</h6>
-                                        <p className='card-text'>9 mph</p>
+                                        <p className='card-text'>{forecast?.current?.wind_speed_10m ?? '--'} {forecast?.current_units?.wind_speed_10m}</p>
                                     </div>
                                 </div>
                             </div>
@@ -67,7 +126,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Precipitation</h6>
-                                        <p className='card-text'>0 in</p>
+                                        <p className='card-text'>{forecast?.current?.precipitation ?? '--'} {forecast?.current_units?.precipitation}</p>
                                     </div>
                                 </div>
                             </div>
@@ -75,62 +134,23 @@ function HomePage() {
                         <h4 className='mt-5'>Daily forecast</h4>
                         {/* BOTTOM 7 DAILY FORECAST CARDS*/}
                         <div className='row g-3'>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Mon</h6>
-                                        <p className='card-text'>14</p>
+                            {forecast?.daily?.time.map((date, index) => (
+                                <div className='col-4 col-md' key={index}>
+                                    <div className='card'>
+                                        <div className='card-body p-2'>
+                                            <div className='d-flex flex-column justify-content-between align-items-center gap-3' style={{ minHeight: "10em" }}>
+                                                <h6 className='card-title mt-2'>{new Date(date).toLocaleDateString("en-US", { weekday: "short" })}</h6>
+                                                <img src={iconSunny} alt='sunny icon' style={{ height: "3em" }} />
+                                                <div className='d-flex justify-content-between mt-auto w-100 gap-2'>
+                                                <p className='card-text'>{forecast?.daily?.temperature_2m_min?.[index] ?? '--'}°</p>
+                                                <p className='card-text'>{forecast?.daily?.temperature_2m_max?.[index] ?? '--'}°</p>
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Tue</h6>
-                                        <p className='card-text'>15</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Wed</h6>
-                                        <p className='card-text'>16</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Thu</h6>
-                                        <p className='card-text'>17</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Fri</h6>
-                                        <p className='card-text'>18</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Sat</h6>
-                                        <p className='card-text'>19</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col-4 col-md'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h6 className='card-title'>Sun</h6>
-                                        <p className='card-text'>20</p>
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                     {/* LONG RIGHT CARD*/}
