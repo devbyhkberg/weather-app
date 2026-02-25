@@ -25,6 +25,11 @@
   --bs-btn-disabled-border-color: var(--neutral-600);
 }
 
+.card {
+  background-color: var(--neutral-800);
+  border-color: var(--neutral-700);
+}
+
 .weather-app .form-control,
 .weather-app .form-select,
 .weather-app .input-group-text {
