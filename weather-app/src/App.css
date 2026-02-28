@@ -12,7 +12,7 @@
   --bs-body-bg: var(--neutral-900);
   --bs-secondary-bg: var(--neutral-700);
   --bs-tertiary-bg: var(--neutral-800);
-  
+
 }
 
 .weather-app .btn-primary {
@@ -32,14 +32,34 @@
 }
 
 .card-rounded-md {
-    --bs-card-border-radius: 20px;
-  }
+  --bs-card-border-radius: 20px;
+}
+
 @media (min-width: 768px) {
   .card-rounded-md {
     --bs-card-border-radius: 25px;
   }
 }
+.min-h-0 {
+  min-height: 0 !important;
+}
 
+.hourly-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hourly-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hourly-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.hourly-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
 
 
 .weather-app .form-control,

@@ -1,18 +1,60 @@
 import searchIcon from '../assets/images/icon-search.svg'
 import bgTodayBig from '../assets/images/bg-today-large.svg'
 import bgTodaySmall from '../assets/images/bg-today-small.svg'
-import iconSunny from '../assets/images/icon-sunny.webp'
-import { useState, useEffect, use } from 'react'
+import { WeatherIcon } from '../components/WeatherIcon'
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react'
 import { useDebounce } from '../hooks/useDebounce'
 import { searchLocations, type GeocodingResult } from '../api/geocoding'
 import { getForecast, type ForecastResponse } from '../api/forecast'
+import type { WeatherEntry, DailyWeatherEntry } from '../types/weather'
+import { DailyWeather } from '../components/DailyWeather'
+import { HourlyWeather } from '../components/HourlyWeather'
 
 function HomePage() {
+    const leftRef = useRef<HTMLDivElement>(null);
+    const [leftHeight, setLeftHeight] = useState<number>(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
     const [selectedLocation, setSelectedLocation] = useState<GeocodingResult | null>(null);
     const [forecast, setForecast] = useState<ForecastResponse | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    useLayoutEffect(() => {
+        const el = leftRef.current;
+        if (!el) return;
+
+        const ro = new ResizeObserver(([entry]) => {
+            setLeftHeight(entry.contentRect.height);
+        });
+
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+
+    const dailyForecast = useMemo<DailyWeatherEntry[]>(() => {
+        if (!forecast) return [];
+        return forecast.daily?.time.map((time, index) => ({
+            time: time,
+            temperature_2m_max: forecast.daily?.temperature_2m_max?.[index],
+            temperature_2m_min: forecast.daily?.temperature_2m_min?.[index],
+            precipitation_sum: forecast.daily?.precipitation_sum?.[index],
+            weather_code: forecast.daily?.weather_code?.[index]
+        })) ?? [];
+    }, [forecast]);
+
+    const hourlyForecast = useMemo<WeatherEntry[]>(() => {
+        if (!forecast) return [];
+        return forecast.hourly?.time.map((time, index) => ({
+            time: time,
+            temperature_2m: forecast.hourly?.temperature_2m?.[index],
+            precipitation: forecast.hourly?.precipitation?.[index],
+            weather_code: forecast.hourly?.weather_code?.[index],
+            apparent_temperature: forecast.hourly?.apparent_temperature?.[index],
+            relative_humidity_2m: forecast.hourly?.relative_humidity_2m?.[index],
+            wind_speed_10m: forecast.hourly?.wind_speed_10m?.[index],
+        })) ?? [];
+    }, [forecast]);
 
     function selectLocation(location: GeocodingResult) {
         setSelectedLocation(location);
@@ -71,8 +113,8 @@ function HomePage() {
                     </div>
                     <button className="btn btn-primary">Search</button>
                 </div>
-                <div className='d-flex justify-content-center w-100 align-items-center flex-wrap flex-md-nowrap gap-4 mt-5'>
-                    <div className='d-flex flex-column justify-content-center align-items-stretch gap-4 flex-fill'>
+                <div className='d-flex justify-content-center w-100 align-items-stretch flex-wrap flex-md-nowrap gap-4 mt-5'>
+                    <div ref={leftRef} className='d-flex flex-column justify-content-start align-items-stretch gap-4 flex-fill'>
                         {/* MAIN CARD */}
                         <div className='card image-card card-rounded-md align-self-stretch'>
                             <picture>
@@ -89,11 +131,11 @@ function HomePage() {
                                         year: "numeric",
                                     })}</p>
                                 </div>
-                                <div className='d-flex justify-content-center align-items-center gap-4'>
-                                    <img src={iconSunny} alt='sunny icon' className='ms-auto' style={{ height: "8em" }} />
+                                <div className='d-flex justify-content-center align-items-center gap-4 ms-md-auto'>
+                                    <WeatherIcon weatherCode={forecast?.current?.weather_code ?? 100} style={{ height: "8em" }} />
                                     <h1 className='display-1'>{forecast?.current?.temperature_2m ?? '--'}°</h1>
                                 </div>
-                                
+
                             </div>
                         </div>
                         {/* WEATHER DESCRIPTION*/}
@@ -102,7 +144,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Feels like</h6>
-                                        <p className='card-text'>{forecast?.current?.apparent_temperature ?? '--'} {forecast?.current_units?.apparent_temperature}</p>
+                                        <p className='card-text mt-3 fs-1 fw-light'>{forecast?.current?.apparent_temperature ?? '--'} {forecast?.current_units?.apparent_temperature}</p>
                                     </div>
                                 </div>
                             </div>
@@ -110,7 +152,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Humidity</h6>
-                                        <p className='card-text'>{forecast?.current?.relative_humidity_2m ?? '--'} {forecast?.current_units?.relative_humidity_2m}</p>
+                                        <p className='card-text mt-3 fs-1 fw-light'>{forecast?.current?.relative_humidity_2m ?? '--'} {forecast?.current_units?.relative_humidity_2m}</p>
                                     </div>
                                 </div>
                             </div>
@@ -118,7 +160,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Wind</h6>
-                                        <p className='card-text'>{forecast?.current?.wind_speed_10m ?? '--'} {forecast?.current_units?.wind_speed_10m}</p>
+                                        <p className='card-text mt-3 fs-1 fw-light'>{forecast?.current?.wind_speed_10m ?? '--'} {forecast?.current_units?.wind_speed_10m}</p>
                                     </div>
                                 </div>
                             </div>
@@ -126,7 +168,7 @@ function HomePage() {
                                 <div className='card'>
                                     <div className='card-body'>
                                         <h6 className='card-title'>Precipitation</h6>
-                                        <p className='card-text'>{forecast?.current?.precipitation ?? '--'} {forecast?.current_units?.precipitation}</p>
+                                        <p className='card-text mt-3 fs-1 fw-light'>{forecast?.current?.precipitation ?? '--'} {forecast?.current_units?.precipitation}</p>
                                     </div>
                                 </div>
                             </div>
@@ -134,38 +176,15 @@ function HomePage() {
                         <h4 className='mt-5'>Daily forecast</h4>
                         {/* BOTTOM 7 DAILY FORECAST CARDS*/}
                         <div className='row g-3'>
-                            {forecast?.daily?.time.map((date, index) => (
-                                <div className='col-4 col-md' key={index}>
-                                    <div className='card'>
-                                        <div className='card-body p-2'>
-                                            <div className='d-flex flex-column justify-content-between align-items-center gap-3' style={{ minHeight: "10em" }}>
-                                                <h6 className='card-title mt-2'>{new Date(date).toLocaleDateString("en-US", { weekday: "short" })}</h6>
-                                                <img src={iconSunny} alt='sunny icon' style={{ height: "3em" }} />
-                                                <div className='d-flex justify-content-between mt-auto w-100 gap-2'>
-                                                <p className='card-text'>{forecast?.daily?.temperature_2m_min?.[index] ?? '--'}°</p>
-                                                <p className='card-text'>{forecast?.daily?.temperature_2m_max?.[index] ?? '--'}°</p>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
+                            {dailyForecast.map((d, index) => (
+                                <DailyWeather key={index} weatherEntry={d} className='col-4 col-md' />
                             ))}
                         </div>
                     </div>
                     {/* LONG RIGHT CARD*/}
-                    <div className='card card-rounded-lg align-self-stretch flex-fill flex-md-grow-0'>
-                        <div className='card-body'>
-                            <div className='d-flex justify-content-between align-items-center gap-3 mb-4'>
-                                <h6 className='card-title'>Hourly forecast</h6>
-                                <select className='form-select w-auto'>
-                                    <option>Today</option>
-                                    <option>Tomorrow</option>
-                                    <option>Next 7 Days</option>
-                                </select>
-                            </div>
-                            <p className='card-text'>United States</p>
-                        </div>
+                    <div style={{ height: leftHeight || undefined, minHeight: 0 }} className="flex-md-grow-0 align-self-stretch">
+                    <HourlyWeather weatherEntries={hourlyForecast} className='h-100'/>
+
                     </div>
                 </div>
             </div>

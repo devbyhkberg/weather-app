@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'DMSans', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -47,6 +47,7 @@ body {
 }
 
 h1 {
+  font-family: 'BricolageGrotesque', sans-serif;
   font-size: 3.2em;
   line-height: 1.1;
 }
@@ -81,4 +82,25 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+@font-face {
+  font-family: 'BricolageGrotesque';
+  src: url('./assets/fonts/Bricolage_Grotesque/BricolageGrotesque-VariableFont_opsz\,wdth\,wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DMSans';
+  src: url('./assets/fonts/DM_Sans/DMSans-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DMSans';
+  src: url('./assets/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz\,wght.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
 }
