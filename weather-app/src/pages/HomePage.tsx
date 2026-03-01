@@ -13,11 +13,19 @@ import { HourlyWeather } from '../components/HourlyWeather'
 function HomePage() {
     const leftRef = useRef<HTMLDivElement>(null);
     const [leftHeight, setLeftHeight] = useState<number>(0);
+    const [isDesktop, setIsDesktop] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
     const [selectedLocation, setSelectedLocation] = useState<GeocodingResult | null>(null);
     const [forecast, setForecast] = useState<ForecastResponse | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    useEffect(() => {
+        const check = () => setIsDesktop(window.innerWidth >= 768);
+        check();
+        window.addEventListener("resize", check);
+        return () => window.removeEventListener("resize", check);
+    }, []);
 
     useLayoutEffect(() => {
         const el = leftRef.current;
@@ -33,7 +41,15 @@ function HomePage() {
 
 
     const dailyForecast = useMemo<DailyWeatherEntry[]>(() => {
-        if (!forecast) return [];
+        if (!forecast) {
+            return Array.from({ length: 7 }, (_, i) => ({
+                time: '',
+                temperature_2m_max: undefined,
+                temperature_2m_min: undefined,
+                precipitation_sum: undefined,
+                weather_code: undefined
+            }));
+        }
         return forecast.daily?.time.map((time, index) => ({
             time: time,
             temperature_2m_max: forecast.daily?.temperature_2m_max?.[index],
@@ -82,7 +98,7 @@ function HomePage() {
     return (
         <div className='container'>
             <div className="d-flex flex-column justify-content-start align-items-center">
-                <h1 className="pt-5">How's the sky looking today?</h1>
+                <h1 className="pt-5 ">How's the sky looking today?</h1>
                 {/* SEARCH BAR */}
                 <div className="d-flex flex-md-row flex-column gap-3 justify-content-start align-items-stretch align-items-md-center mt-5">
                     <div className='drowpdown'>
@@ -182,8 +198,8 @@ function HomePage() {
                         </div>
                     </div>
                     {/* LONG RIGHT CARD*/}
-                    <div style={{ height: leftHeight || undefined, minHeight: 0 }} className="flex-md-grow-0 align-self-stretch">
-                    <HourlyWeather weatherEntries={hourlyForecast} className='h-100'/>
+                    <div style={{ height: isDesktop ? leftHeight : undefined, minHeight: 0 }} className="flex-md-grow-0 flex-fill align-self-stretch">
+                        <HourlyWeather weatherEntries={hourlyForecast} className='h-100' />
 
                     </div>
                 </div>

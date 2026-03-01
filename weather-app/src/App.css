@@ -29,6 +29,13 @@
 .card {
   background-color: var(--neutral-800);
   border-color: var(--neutral-700);
+  --bs-card-border-radius: 20px
+}
+
+.daily-card {
+  background-color: var(--neutral-700);
+  border-color: var(--neutral-600); 
+  --bs-card-border-radius: 10px
 }
 
 .card-rounded-md {

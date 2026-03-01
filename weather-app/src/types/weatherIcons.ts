@@ -42,4 +42,4 @@ export const WEATHER_ICON_BY_CODE: Record<WeatherCode, IconDefinition> = {
     99: { src: iconStorm, alt: 'Thunderstorm with Hail' },
 }
 
-export const DEFAULT_WEATHER_ICON: IconDefinition = { src: '../assets/images/icon-error.webp', alt: 'Default Weather Icon' }
+export const DEFAULT_WEATHER_ICON: IconDefinition = { src: iconSunny, alt: 'Default Weather Icon' }

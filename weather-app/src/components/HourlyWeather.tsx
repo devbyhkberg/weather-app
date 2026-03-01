@@ -37,7 +37,7 @@ export function HourlyWeather({ weatherEntries, className }: { weatherEntries: W
                                 <option key={day} value={day}>{day}</option>
                             ))}
                         </select>
-                    </div>
+                    </div>  
                     <div className='d-flex hourly-scroll flex-column justify-content-start align-items-stretch gap-3 overflow-auto flex-grow-1 min-h-0 px-3'>
                         {entriesByDay.get(selectedDay ?? availableDaysOfWeek[0])?.map((entry, index) => (
                             <WeatherHour key={index} weatherEntry={entry} />
